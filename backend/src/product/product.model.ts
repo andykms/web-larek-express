@@ -1,49 +1,61 @@
-import mongoose from "mongoose";
+import { Joi } from 'celebrate';
+import mongoose from 'mongoose';
+
+export const productValidSchema = Joi.object({
+    title: Joi.string().min(2).max(30).required(),
+    image: Joi.object({
+        fileName: Joi.string().required(),
+        originalName: Joi.string().required(),
+    }).required(),
+    category: Joi.string().required(),
+    description: Joi.string(),
+    price: Joi.string().allow(null),
+});
 
 interface IImage {
-  fileName: string,
-  originalName: string,
+    fileName: string;
+    originalName: string;
 }
 
-interface IProduct {
-  title: string,
-  image: IImage,
-  category: string,
-  description: string,
-  price: number | null,
+export interface IProduct {
+    title: string;
+    image: IImage;
+    category: string;
+    description: string;
+    price: number | null;
 }
 
 const imageSchema = new mongoose.Schema<IImage>({
-  fileName: {
-    type: String,
-    required: true,
-  },
-  originalName: {
-    type: String,
-    required: true
-  }
-})
+    fileName: {
+        type: String,
+        required: true,
+    },
+    originalName: {
+        type: String,
+        required: true,
+    },
+});
 
 const productSchema = new mongoose.Schema<IProduct>({
-  title: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-    unique: true,
-  },
-  image: imageSchema,
-  category: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-  price: {
-    type: Number,
-    default: null,
-  }
-})
+    title: {
+        type: String,
+        required: true,
+        minlength: 2,
+        maxlength: 30,
+        unique: true,
+    },
+    image: imageSchema,
+    category: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+    },
+    price: {
+        type: Number,
+        default: null,
+    },
+});
 
 export default mongoose.model<IProduct>('product', productSchema);
