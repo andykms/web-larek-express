@@ -8,6 +8,9 @@ import cors from 'cors';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import { Response, Request } from 'express';
 import { errorHandler } from './middlewares/errorHandler';
+import { walk } from './utils/walkFiles';
+import { deleteFile } from './utils/delete';
+import cron from 'node-cron';
 
 dotenv.config({ path: './.env' });
 
@@ -19,8 +22,23 @@ const { PORT = 3000 } = process.env;
 if (dbUrl) {
     mongoose.connect(dbUrl);
 } else {
-    throw new Error("Don't connect to DB | Невозможно подключиться к базе данных");
+    throw new Error("невозможно подключиться к базе данных");
 }
+
+export const FILES_TIMEOUTS: Map<string, number> = new Map();
+
+const uploadPath = path.join(__dirname, '../uploads');
+
+cron.schedule('*/5 * * * *', async () => {
+    try {
+        const checkedFiles = await walk(uploadPath);
+        checkedFiles.forEach((file) => {
+            deleteFile(file);
+        });
+    } catch (err) {
+        throw new Error(`ошибка удаления файлов в папке uploads: ${err}`);
+    }
+});
 
 //Основные мидлвары
 app.use(express.json());

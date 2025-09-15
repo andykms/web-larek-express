@@ -1,9 +1,6 @@
 import mongoose from 'mongoose';
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
-import { NotFoundError } from '../errors/not-found-error';
-import { BadRequestError } from '../errors/bad-request-error';
-import { InternalServerError } from '../errors/server-error';
 
 export const userValidation = Joi.object({
     name: Joi.string().min(2).max(30),
@@ -29,6 +26,13 @@ interface UserModel extends mongoose.Model<IUser> {
     ) => Promise<mongoose.Document<unknown, any, IUser>>;
 }
 
+const tokenSchema = new mongoose.Schema<IToken>({
+    token: {
+        type: String,
+        required: true,
+    },
+});
+
 const userSchema = new mongoose.Schema<IUser, UserModel>({
     name: {
         type: String,
@@ -47,28 +51,24 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
         required: true,
         select: false,
     },
-    tokens: [
-        {
-            type: String,
-        },
-    ],
+    tokens: [tokenSchema],
 });
 
 userSchema.static(
     'findUserByCredentials',
     async function findUserByCredentials(email: string, password: string) {
         try {
-            const user = await this.findOne({ email });
+            const user = await this.findOne({ email }).select('+password');
             if (!user) {
-                return Promise.reject(new NotFoundError());
+                return Promise.reject(404);
             }
             const matched = await bcrypt.compare(password, user.password);
             if (!matched) {
-                return Promise.reject(new BadRequestError('неправильный логин или пароль'));
+                return Promise.reject(401);
             }
             return Promise.resolve(user);
-        } catch {
-            return Promise.reject(new InternalServerError('ошибка авторизации'));
+        } catch (error) {
+            return Promise.reject(error);
         }
     },
 );

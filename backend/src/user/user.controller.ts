@@ -1,6 +1,6 @@
 import User from './user.model';
 import { NextFunction, Request, Response } from 'express';
-import jwt, { SignCallback } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { NotFoundError } from '../errors/not-found-error';
 import { UnauthorizedError } from '../errors/unauthorized-error';
@@ -33,9 +33,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             expiresIn: ms(refreshTokenExpiry || '7d') / 1000,
         });
         const id = user._id;
-
-        await User.findByIdAndUpdate(id, { $push: { tokens: refreshToken } });
-
+        await User.findByIdAndUpdate(id, { $push: { tokens: { token: refreshToken } } }).select(
+            '+tokens',
+        );
         res.cookie('refreshToken', refreshToken, {
             sameSite: 'lax',
             secure: false,
@@ -52,7 +52,15 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             accessToken,
         });
     } catch (error) {
-        next(error);
+        if (error === 404) {
+            next(new NotFoundError('пользователь не найден'));
+            return;
+        }
+        if (error === 401) {
+            next(new UnauthorizedError('неверный пароль'));
+            return;
+        }
+        next(new InternalServerError());
     }
 };
 
@@ -60,10 +68,14 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const userId = jwt.verify(req.cookies.refreshToken, refreshTokenSecret);
         if (!userId) {
-            next(new UnauthorizedError());
+            next(new BadRequestError());
             return;
         }
-        await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
+        const user = await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
+        if (!user) {
+            next(new NotFoundError('пользователь не найден'));
+            return;
+        }
         res.clearCookie('refreshToken');
         res.cookie('refreshToken', '', {
             sameSite: 'lax',
@@ -85,14 +97,22 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
     }
     try {
         const decodedId = await jwt.verify(refreshToken, refreshTokenSecret);
-        const accessToken = jwt.sign({ _id: decodedId }, accessTokenSecret, {
-            expiresIn: ms(accessTokenExpiry || '10m') / 1000,
-        });
+        if (!decodedId) {
+            next(new UnauthorizedError());
+            return;
+        }
         const user = await User.findById(decodedId);
         if (!user) {
             next(new NotFoundError('пользователь не найден'));
             return;
         }
+        if (!user.tokens.includes(refreshToken)) {
+            next(new UnauthorizedError());
+            return;
+        }
+        const accessToken = jwt.sign({ _id: decodedId }, accessTokenSecret, {
+            expiresIn: ms(accessTokenExpiry || '10m') / 1000,
+        });
         return res.send({
             user: {
                 name: user.name,
@@ -145,12 +165,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-export const getCurrentUser = async (
-    req: Request & { userId: string },
-    res: Response,
-    next: NextFunction,
-) => {
-    const userId = req.userId;
+export const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user;
+    if (!userId) {
+        next(new UnauthorizedError());
+        return;
+    }
     try {
         const user = await User.findById(userId);
         if (!user) {
