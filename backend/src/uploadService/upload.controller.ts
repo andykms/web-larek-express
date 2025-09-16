@@ -3,44 +3,70 @@ import path from 'path';
 import { BadRequestError } from '../errors/bad-request-error';
 import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { InternalServerError } from '../errors/server-error';
-import { FILES_TIMEOUTS } from '../app';
-import { MAX_IMAGE_SIZE_IN_BYTES } from '../utils/constants';
+import { RequestHandler } from 'express';
 
-const uploadDirectory = path.join(__dirname, '../../uploads/product-images');
+interface IUploadParams {
+    uploadDirectory: string;
+    fileSize: number;
+    fileTypes: string[];
+    fileTimeouts: Map<string, number>;
+}
 
-export const uploadMiddleware = multer({
-    dest: uploadDirectory,
-    limits: {
-        fileSize: MAX_IMAGE_SIZE_IN_BYTES,
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-            cb(null, true);
-        } else {
-            cb(new BadRequestError('неверный формат файла'));
-        }
-    },
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, uploadDirectory);
-        },
-        filename: (req, file, cb) => {
-            cb(null, `${Date.now()}-${file.originalname}`);
-        },
-    }),
-});
+export class UploadController {
+    private fileTimeouts: Map<string, number>;
+    private uploadMiddlewareFn: multer.Multer;
+    private uploadDirectory: string;
 
-export function uploadProductImage(req: Request, res: Response, next: NextFunction) {
-    const file = req.file;
-    if (!file) {
-        next(new InternalServerError('не удалось обработать файл'));
-        return;
+    constructor(uploadParams: IUploadParams) {
+        const { uploadDirectory, fileSize, fileTypes, fileTimeouts } = uploadParams;
+        this.fileTimeouts = fileTimeouts;
+        this.uploadDirectory = uploadDirectory;
+        const fileTypesSet = new Set(fileTypes);
+        const absoluteUploadDirectory = path.join(__dirname, '../../uploads', uploadDirectory);
+        this.uploadMiddlewareFn = multer({
+            dest: absoluteUploadDirectory,
+            limits: {
+                fileSize: fileSize,
+            },
+            fileFilter: (req, file, cb) => {
+                if (fileTypesSet.has(file.mimetype)) {
+                    cb(null, true);
+                } else {
+                    cb(new BadRequestError('неверный формат файла'));
+                }
+            },
+            storage: multer.diskStorage({
+                destination: (req, file, cb) => {
+                    cb(null, absoluteUploadDirectory);
+                },
+                filename: (req, file, cb) => {
+                    const fileName = `${Date.now()}-${file.originalname}`;
+                    cb(null, fileName);
+                },
+            }),
+        });
     }
-    const originalName = file.originalname;
-    const fileName = file.filename;
-    FILES_TIMEOUTS.set(file.path, Date.now());
-    res.status(201).json({
-        originalName,
-        fileName,
-    });
+
+    public getUploadMiddleware(isFiles?: boolean): RequestHandler {
+        return this.uploadMiddlewareFn.single(isFiles ? 'files' : 'file').bind(this);
+    }
+
+    public getUploadController(): RequestHandler {
+        return this.upload.bind(this);
+    }
+
+    private upload(req: Request, res: Response, next: NextFunction) {
+        const file = req.file;
+        if (!file) {
+            next(new InternalServerError('не удалось обработать файл'));
+            return;
+        }
+        const originalName = file.originalname;
+        const fileName = path.join(this.uploadDirectory, file.filename);
+        this.fileTimeouts.set(fileName, Date.now());
+        res.status(201).json({
+            originalName,
+            fileName,
+        });
+    }
 }

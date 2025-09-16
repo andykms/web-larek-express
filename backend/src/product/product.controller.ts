@@ -26,23 +26,21 @@ export function getProducts(req: Request, res: Response, next: NextFunction) {
         });
 }
 
-export function createProduct(req: Request, res: Response, next: NextFunction) {
+export async function createProduct(req: Request, res: Response, next: NextFunction) {
     const productData = req.body;
-    Product.create(productData)
-        .then((product) => {
-            move(
-                path.join(__dirname, '../../uploads/product-images', product.image.fileName),
-                path.join(__dirname, '../../public/images', product.image.fileName),
-            );
-            res.status(201).send(product);
-        })
-        .catch((error) => {
-            if (error instanceof MongooseError.ValidationError) {
-                return next(new BadRequestError());
-            }
-            if (error instanceof Error && error.message.includes('E11000')) {
-                return next(new ConflictError());
-            }
-            return next(new InternalServerError());
-        });
+    try {
+        const from = path.join('../../uploads', productData.image.fileName);
+        const to = path.join('../../public', productData.image.fileName);
+        await move(path.join(__dirname, from), path.join(__dirname, to));
+        const product = await Product.create(productData);
+        return res.status(201).send(product);
+    } catch (error) {
+        if (error instanceof MongooseError.ValidationError) {
+            return next(new BadRequestError());
+        }
+        if (error instanceof Error && error.message.includes('E11000')) {
+            return next(new ConflictError());
+        }
+        return next(new InternalServerError());
+    }
 }

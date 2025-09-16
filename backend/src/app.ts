@@ -11,7 +11,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import { walk } from './utils/walkFiles';
 import { deleteFile } from './utils/delete';
 import cron from 'node-cron';
-import { MAX_FILE_TIME_IN_MS } from './utils/constants';
+import { MAX_FILE_TIME_IN_MS, FILES_TIMEOUTS } from './utils/constants';
 import uploadRouter from './uploadService/upload.router';
 
 dotenv.config({ path: './.env' });
@@ -26,8 +26,6 @@ if (dbUrl) {
 } else {
     throw new Error('невозможно подключиться к базе данных');
 }
-
-export const FILES_TIMEOUTS: Map<string, number> = new Map();
 
 const uploadPath = path.join(__dirname, '../uploads');
 
