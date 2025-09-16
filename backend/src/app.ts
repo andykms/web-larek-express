@@ -11,6 +11,8 @@ import { errorHandler } from './middlewares/errorHandler';
 import { walk } from './utils/walkFiles';
 import { deleteFile } from './utils/delete';
 import cron from 'node-cron';
+import { MAX_FILE_TIME_IN_MS } from './utils/constants';
+import uploadRouter from './uploadService/upload.router';
 
 dotenv.config({ path: './.env' });
 
@@ -22,7 +24,7 @@ const { PORT = 3000 } = process.env;
 if (dbUrl) {
     mongoose.connect(dbUrl);
 } else {
-    throw new Error("невозможно подключиться к базе данных");
+    throw new Error('невозможно подключиться к базе данных');
 }
 
 export const FILES_TIMEOUTS: Map<string, number> = new Map();
@@ -32,7 +34,13 @@ const uploadPath = path.join(__dirname, '../uploads');
 cron.schedule('*/5 * * * *', async () => {
     try {
         const checkedFiles = await walk(uploadPath);
+        const now = Date.now();
         checkedFiles.forEach((file) => {
+            const timestamp = FILES_TIMEOUTS.get(file);
+            if ((timestamp && Math.abs(now - timestamp) > MAX_FILE_TIME_IN_MS) || !timestamp) {
+                FILES_TIMEOUTS.delete(file);
+                deleteFile(path.join(__dirname, '../uploads', file));
+            }
             deleteFile(file);
         });
     } catch (err) {
@@ -52,6 +60,7 @@ app.use(requestLogger);
 //Роуты сущностей
 app.use(productRouter);
 app.use(orderRouter);
+app.use(uploadRouter);
 
 //Логи ошибок
 app.use(errorLogger);

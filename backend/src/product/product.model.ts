@@ -1,5 +1,7 @@
 import { Joi } from 'celebrate';
 import mongoose from 'mongoose';
+import { deleteFile } from '../utils/delete';
+import path from 'path';
 
 export const productValidSchema = Joi.object({
     title: Joi.string().min(2).max(30).required(),
@@ -9,7 +11,7 @@ export const productValidSchema = Joi.object({
     }).required(),
     category: Joi.string().required(),
     description: Joi.string(),
-    price: Joi.string().allow(null),
+    price: Joi.number().min(0).allow(null),
 });
 
 interface IImage {
@@ -56,6 +58,10 @@ const productSchema = new mongoose.Schema<IProduct>({
         type: Number,
         default: null,
     },
+});
+
+productSchema.post('deleteOne', async (doc) => {
+    await deleteFile(path.join(__dirname, '../../public/images', doc.image.fileName));
 });
 
 export default mongoose.model<IProduct>('product', productSchema);

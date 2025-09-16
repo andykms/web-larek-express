@@ -1,10 +1,9 @@
-import fs from 'fs';
+import { promises as fs } from 'fs';
 
 export async function move(oldPath: string, newPath: string) {
-    fs.rename(oldPath, newPath, (err) => {
-        if (err) {
-            return;
-        }
-        console.log('File moved successfully');
-    });
+    try {
+        await fs.rename(oldPath, newPath);
+    } catch (err) {
+        return Promise.reject(err);
+    }
 }

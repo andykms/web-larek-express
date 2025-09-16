@@ -6,6 +6,8 @@ import { Error as MongooseError } from 'mongoose';
 import { InternalServerError } from '../errors/server-error';
 import { productValidSchema } from './product.model';
 import { celebrate, Segments } from 'celebrate';
+import { move } from '../utils/move';
+import path from 'path';
 
 export const productRouteValidator = celebrate({
     [Segments.BODY]: productValidSchema,
@@ -28,6 +30,10 @@ export function createProduct(req: Request, res: Response, next: NextFunction) {
     const productData = req.body;
     Product.create(productData)
         .then((product) => {
+            move(
+                path.join(__dirname, '../../uploads/product-images', product.image.fileName),
+                path.join(__dirname, '../../public/images', product.image.fileName),
+            );
             res.status(201).send(product);
         })
         .catch((error) => {

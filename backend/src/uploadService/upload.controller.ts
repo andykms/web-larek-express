@@ -3,11 +3,15 @@ import path from 'path';
 import { BadRequestError } from '../errors/bad-request-error';
 import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { InternalServerError } from '../errors/server-error';
+import { FILES_TIMEOUTS } from '../app';
+import { MAX_IMAGE_SIZE_IN_BYTES } from '../utils/constants';
+
+const uploadDirectory = path.join(__dirname, '../../uploads/product-images');
 
 export const uploadMiddleware = multer({
-    dest: path.join(__dirname, '../../uploads/product-images'),
+    dest: uploadDirectory,
     limits: {
-        fileSize: 1064960,
+        fileSize: MAX_IMAGE_SIZE_IN_BYTES,
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
@@ -18,7 +22,7 @@ export const uploadMiddleware = multer({
     },
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, path.join(__dirname, '../../uploads/product-images'));
+            cb(null, uploadDirectory);
         },
         filename: (req, file, cb) => {
             cb(null, `${Date.now()}-${file.originalname}`);
@@ -27,7 +31,6 @@ export const uploadMiddleware = multer({
 });
 
 export function uploadProductImage(req: Request, res: Response, next: NextFunction) {
-    //Нужно поставить таймер с помощью cron на удаление файла изображения спустя некоторое время
     const file = req.file;
     if (!file) {
         next(new InternalServerError('не удалось обработать файл'));
@@ -35,6 +38,7 @@ export function uploadProductImage(req: Request, res: Response, next: NextFuncti
     }
     const originalName = file.originalname;
     const fileName = file.filename;
+    FILES_TIMEOUTS.set(file.path, Date.now());
     res.status(201).json({
         originalName,
         fileName,
