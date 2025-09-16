@@ -1,12 +1,13 @@
-import { getProducts, createProduct } from './product.controller';
+import { getProducts, createProduct, patchProduct } from './product.controller';
 import { Router } from 'express';
-import { productRouteValidator } from './product.controller';
+import { productPostValidator, productUpdateValidator } from './product.validator';
 
 const productRouter = Router();
 
 const rootPath = '/product';
 
 productRouter.get(rootPath, getProducts);
-productRouter.post(rootPath, productRouteValidator, createProduct);
+productRouter.post(rootPath, productPostValidator, createProduct);
+productRouter.patch(`${rootPath}/:id`, productUpdateValidator, patchProduct);
 
 export default productRouter;

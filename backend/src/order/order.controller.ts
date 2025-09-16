@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { BadRequestError } from '../errors/bad-request-error';
 import Product from '../product/product.model';
 import { faker } from '@faker-js/faker';
-import { orderValidSchema } from './order.model';
-import { celebrate, Segments } from 'celebrate';
 
 export async function createOrder(req: Request, res: Response, next: NextFunction) {
     const { total, items } = req.body;
@@ -35,7 +33,3 @@ export async function createOrder(req: Request, res: Response, next: NextFunctio
         total: total,
     });
 }
-
-export const orderRouteValidator = celebrate({
-    [Segments.BODY]: orderValidSchema,
-});
