@@ -1,12 +1,5 @@
 import mongoose from 'mongoose';
-import Joi from 'joi';
 import bcrypt from 'bcrypt';
-
-export const userValidation = Joi.object({
-    name: Joi.string().min(2).max(30),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-});
 
 interface IToken {
     token: string;
@@ -60,7 +53,7 @@ userSchema.static(
         try {
             const user = await this.findOne({ email }).select('+password');
             if (!user) {
-                return Promise.reject(404);
+                return Promise.reject(401);
             }
             const matched = await bcrypt.compare(password, user.password);
             if (!matched) {

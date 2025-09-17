@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import { login, register, refresh, getCurrentUser, logout } from './user.controller';
+import { auth } from '../middlewares/auth';
+import { registrationValidator } from './user.validator';
 
 const rootPath = '/auth';
 
-const router = Router();
+const userRouter = Router();
 
-router.post(`${rootPath}/register`, register);
-router.post(`${rootPath}/login`, login);
-router.post(`${rootPath}/refresh`, refresh);
-router.get(`${rootPath}/user`, getCurrentUser);
-router.post(`${rootPath}/logout`, logout);
+userRouter.post(`${rootPath}/register`, registrationValidator, register);
+userRouter.post(`${rootPath}/login`, login);
+userRouter.get(`${rootPath}/token`, auth, refresh);
+userRouter.get(`${rootPath}/user`, auth, getCurrentUser);
+userRouter.get(`${rootPath}/logout`, logout);
 
-export default router;
+export default userRouter;

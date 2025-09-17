@@ -7,6 +7,7 @@ import { InternalServerError } from '../errors/server-error';
 import { move } from '../utils/move';
 import { deleteFile } from '../utils/delete';
 import path from 'path';
+import { NotFoundError } from '../errors/not-found-error';
 
 export function getProducts(req: Request, res: Response, next: NextFunction) {
     Product.find({})
@@ -41,6 +42,9 @@ export async function createProduct(req: Request, res: Response, next: NextFunct
 }
 
 export async function patchProduct(req: Request, res: Response, next: NextFunction) {
+    if (!req.params.id) {
+        return next(new BadRequestError());
+    }
     const productData = req.body;
     try {
         if (productData.image) {
@@ -64,6 +68,23 @@ export async function patchProduct(req: Request, res: Response, next: NextFuncti
         if (error instanceof Error && error.message.includes('E11000')) {
             return next(new ConflictError());
         }
+        return next(new InternalServerError());
+    }
+}
+
+export async function deleteProduct(req: Request, res: Response, next: NextFunction) {
+    if (!req.params.id) {
+        return next(new BadRequestError());
+    }
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (product) {
+            await deleteFile(path.join(__dirname, '../../public', product.image.fileName));
+        } else {
+            return next(new NotFoundError());
+        }
+        return res.status(200).send(product);
+    } catch (error) {
         return next(new InternalServerError());
     }
 }

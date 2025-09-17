@@ -13,8 +13,8 @@ import bcrypt from 'bcrypt';
 
 dotenv.config({ path: './.env' });
 
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+const accessTokenSecret = process.env.AUTH_ACCESS_TOKEN_SECRET;
+const refreshTokenSecret = process.env.AUTH_REFRESH_TOKEN_SECRET;
 const accessTokenExpiry = process.env.AUTH_ACCESS_TOKEN_EXPIRY;
 const refreshTokenExpiry = process.env.AUTH_REFRESH_TOKEN_EXPIRY;
 
@@ -52,12 +52,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             accessToken,
         });
     } catch (error) {
-        if (error === 404) {
-            next(new NotFoundError('пользователь не найден'));
-            return;
-        }
         if (error === 401) {
-            next(new UnauthorizedError('неверный пароль'));
+            next(new UnauthorizedError('неверный логин или пароль'));
             return;
         }
         next(new InternalServerError());
@@ -65,16 +61,17 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.cookies || !req.cookies.accessToken) {
+        return next(new BadRequestError('токен не найден'));
+    }
     try {
-        const userId = jwt.verify(req.cookies.refreshToken, refreshTokenSecret);
+        const userId = jwt.verify(req.cookies.accessToken, refreshTokenSecret);
         if (!userId) {
-            next(new BadRequestError());
-            return;
+            return next(new BadRequestError('токен не действительный'));
         }
         const user = await User.findByIdAndUpdate(userId, { $set: { tokens: [] } });
         if (!user) {
-            next(new NotFoundError('пользователь не найден'));
-            return;
+            return next(new NotFoundError('пользователь не найден'));
         }
         res.clearCookie('refreshToken');
         res.cookie('refreshToken', '', {
@@ -90,11 +87,10 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const refresh = async (req: Request, res: Response, next: NextFunction) => {
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) {
-        next(new UnauthorizedError());
-        return;
+    if (!req.cookies || !req.cookies?.refreshToken) {
+        return next(new BadRequestError());
     }
+    const { refreshToken } = req.cookies;
     try {
         const decodedId = await jwt.verify(refreshToken, refreshTokenSecret);
         if (!decodedId) {
@@ -106,7 +102,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
             next(new NotFoundError('пользователь не найден'));
             return;
         }
-        if (!user.tokens.includes(refreshToken)) {
+        if (!user.tokens.some((tokenObj) => tokenObj.token === refreshToken)) {
             next(new UnauthorizedError());
             return;
         }
@@ -130,14 +126,14 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const { name, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({ name, email, hashedPassword });
+        const user = await User.create({ name, email, password: hashedPassword });
         const accessToken = jwt.sign({ _id: user._id }, accessTokenSecret, {
             expiresIn: ms(accessTokenExpiry || '10m') / 1000,
         });
         const refreshToken = jwt.sign({ _id: user._id }, refreshTokenSecret, {
             expiresIn: ms(refreshTokenExpiry || '7d') / 1000,
         });
-        await user.updateOne({ $push: { tokens: refreshToken } });
+        await User.findByIdAndUpdate(user.id, { $push: { tokens: refreshToken } });
 
         res.cookie('refreshToken', refreshToken, {
             sameSite: 'lax',
@@ -155,6 +151,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
             accessToken,
         });
     } catch (error) {
+        console.error(error);
         if (error instanceof MongooseError.ValidationError) {
             return next(new BadRequestError());
         }
