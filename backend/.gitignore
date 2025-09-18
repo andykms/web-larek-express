@@ -20,4 +20,5 @@ temp
 .env
 logs/errors.log
 logs/requests.log
-uploads/images
+uploads/images/.*
+public/images/.*
