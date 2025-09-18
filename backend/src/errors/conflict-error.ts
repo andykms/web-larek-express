@@ -1,10 +1,10 @@
-import type { IError } from './type-error';
+import type IError from './type-error';
 
-export class ConflictError extends Error implements IError {
-    public statusCode: number;
+export default class ConflictError extends Error implements IError {
+  public statusCode: number;
 
-    constructor(message?: string) {
-        super(message || 'ресурс уже существует');
-        this.statusCode = 409;
-    }
+  constructor(message?: string) {
+    super(message || 'ресурс уже существует');
+    this.statusCode = 409;
+  }
 }

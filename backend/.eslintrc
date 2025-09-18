@@ -44,6 +44,7 @@
         "varsIgnorePattern": "^_",
         "caughtErrorsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "object-curly-newline": "off"
   }
 }

@@ -1,8 +1,8 @@
 import { Response, Request, NextFunction } from 'express';
-import { IError } from '../errors/type-error';
+import type IError from '../errors/type-error';
 
-export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
-    res.status((err as IError).statusCode || 500).send(
-        (err as IError).message || 'ошибка выполнения запроса',
-    );
+export default function errorHandler(err: unknown, _: Request, res: Response, __: NextFunction) {
+  res
+    .status((err as IError).statusCode || 500)
+    .send((err as IError).message || 'ошибка выполнения запроса');
 }

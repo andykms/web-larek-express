@@ -1,7 +1,7 @@
-import { getProducts, createProduct, patchProduct, deleteProduct } from './product.controller';
 import { Router } from 'express';
+import { getProducts, createProduct, patchProduct, deleteProduct } from './product.controller';
 import { productPostValidator, productUpdateValidator } from './product.validator';
-import { auth } from '../middlewares/auth';
+import auth from '../middlewares/auth';
 
 const productRouter = Router();
 
