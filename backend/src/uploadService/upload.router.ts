@@ -7,7 +7,7 @@ const rootPath = '/upload';
 const uploadRouter = Router();
 
 const uploadImageController = new UploadController({
-  fileTypes: ['image/jpeg', 'image/png'],
+  fileTypes: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/svg+xml'],
   fileSize: MAX_IMAGE_SIZE_IN_BYTES,
   fileTimeouts: FILES_TIMEOUTS,
   uploadDirectory: '/images',
