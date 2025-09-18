@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import { Error as MongooseError } from 'mongoose';
 import bcrypt from 'bcrypt';
 import User from './user.model';
@@ -10,26 +9,22 @@ import ms from '../utils/ms';
 import BadRequestError from '../errors/bad-request-error';
 import ConflictError from '../errors/conflict-error';
 import InternalServerError from '../errors/server-error';
-
-dotenv.config({ path: './.env' });
-
-const accessTokenSecret = process.env.AUTH_ACCESS_TOKEN_SECRET;
-const refreshTokenSecret = process.env.AUTH_REFRESH_TOKEN_SECRET;
-const accessTokenExpiry = process.env.AUTH_ACCESS_TOKEN_EXPIRY;
-const refreshTokenExpiry = process.env.AUTH_REFRESH_TOKEN_EXPIRY;
-
-if (accessTokenSecret === undefined || refreshTokenSecret === undefined) {
-  throw new Error('не найдены секретные подписи для jwt');
-}
+import {
+  AUTH_ACCESS_TOKEN_SECRET as accessTokenSecret,
+  AUTH_REFRESH_TOKEN_SECRET as refreshTokenSecret,
+  AUTH_ACCESS_TOKEN_EXPIRY as accessTokenExpiry,
+  AUTH_REFRESH_TOKEN_EXPIRY as refreshTokenExpiry,
+} from '../utils/constants';
+import getValidJwtPayload from '../utils/getValidJwtPayload';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   try {
     const user = await User.findUserByCredentials(email, password);
-    const accessToken = jwt.sign({ _id: user._id }, accessTokenSecret, {
+    const accessToken = jwt.sign({ _id: user._id }, accessTokenSecret!, {
       expiresIn: ms(accessTokenExpiry || '10m') / 1000,
     });
-    const refreshToken = jwt.sign({ _id: user._id }, refreshTokenSecret, {
+    const refreshToken = jwt.sign({ _id: user._id }, refreshTokenSecret!, {
       expiresIn: ms(refreshTokenExpiry || '7d') / 1000,
     });
     const id = user._id;
@@ -67,7 +62,9 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     return next(new BadRequestError('токен не найден'));
   }
   try {
-    const userId = jwt.verify(req.cookies.accessToken, accessTokenSecret);
+    const userId = getValidJwtPayload(
+      await jwt.verify(req.cookies.accessToken, accessTokenSecret!),
+    );
     if (!userId) {
       return next(new BadRequestError('токен не действительный'));
     }
@@ -98,7 +95,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
   }
   const { refreshToken } = req.cookies;
   try {
-    const decodedId = await jwt.verify(refreshToken, refreshTokenSecret);
+    const decodedId = getValidJwtPayload(await jwt.verify(refreshToken, refreshTokenSecret!));
     const user = await User.findById(decodedId);
     if (!user) {
       return next(new NotFoundError('пользователь не найден'));
@@ -106,7 +103,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
     if (!user.tokens.some((tokenObj) => tokenObj.token === refreshToken)) {
       return next(new UnauthorizedError());
     }
-    const accessToken = jwt.sign({ _id: decodedId }, accessTokenSecret, {
+    const accessToken = jwt.sign({ _id: decodedId }, accessTokenSecret!, {
       expiresIn: ms(accessTokenExpiry || '10m') / 1000,
     });
     return res.send({
@@ -127,10 +124,10 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword, tokens: [] });
-    const accessToken = jwt.sign({ _id: user._id }, accessTokenSecret, {
+    const accessToken = jwt.sign({ _id: user._id }, accessTokenSecret!, {
       expiresIn: ms(accessTokenExpiry || '10m') / 1000,
     });
-    const refreshToken = jwt.sign({ _id: user._id }, refreshTokenSecret, {
+    const refreshToken = jwt.sign({ _id: user._id }, refreshTokenSecret!, {
       expiresIn: ms(refreshTokenExpiry || '7d') / 1000,
     });
     await User.findByIdAndUpdate(
@@ -166,11 +163,10 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
-  let userId = req.user;
-  if (!userId) {
+  if (!req.user) {
     return next(new UnauthorizedError());
   }
-  if (typeof userId !== 'string') userId = userId._id;
+  const userId = getValidJwtPayload(req.user);
   try {
     const user = await User.findById(userId);
     if (!user) {

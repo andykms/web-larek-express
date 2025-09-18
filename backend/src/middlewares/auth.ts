@@ -1,16 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
+import { AUTH_ACCESS_TOKEN_SECRET as accessTokenSecret } from '../utils/constants';
 import UnauthorizedError from '../errors/unauthorized-error';
-
-dotenv.config({ path: './.env' });
-
-const accessTokenSecret = process.env.AUTH_ACCESS_TOKEN_SECRET;
-
-if (!accessTokenSecret) {
-  throw new Error('не найдены секретные подписи для jwt');
-}
 
 export default async function auth(req: Request, _: Response, next: NextFunction) {
   const headerToken = req.headers.authorization;
@@ -24,6 +15,6 @@ export default async function auth(req: Request, _: Response, next: NextFunction
   } catch {
     return next(new UnauthorizedError());
   }
-  req.user = typeof payload === 'string' ? JSON.parse(payload) : payload;
+  req.user = payload;
   return next();
 }

@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cron from 'node-cron';
 import path from 'path';
 import cors from 'cors';
@@ -12,16 +11,12 @@ import errorHandler from './middlewares/errorHandler';
 import uploadCleaner from './utils/uploadCleaner';
 import uploadRouter from './uploadService/upload.router';
 import userRouter from './user/user.router';
-
-dotenv.config({ path: './.env' });
+import { DB_ADDRESS, PORT } from './utils/constants';
 
 const app = express();
 
-const dbUrl = process.env.DB_ADDRESS;
-const { PORT = 3000 } = process.env;
-
-if (dbUrl) {
-  mongoose.connect(dbUrl);
+if (DB_ADDRESS) {
+  mongoose.connect(DB_ADDRESS);
 } else {
   throw new Error('невозможно подключиться к базе данных');
 }
