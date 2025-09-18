@@ -19,5 +19,3 @@ dist
 temp
 .env
 logs/.*
-uploads/images/*
-public/images/*
