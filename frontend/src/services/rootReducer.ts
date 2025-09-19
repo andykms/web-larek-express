@@ -4,10 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import basketSlice from './slice/basket';
 import { orderSlice } from './slice/order/order-slice';
 import { productsSlice } from './slice/products/products-slice';
-<<<<<<< HEAD
-=======
 import { userSlice } from './slice/user/user-slice';
->>>>>>> admin
 
 const persistConfigBasket = {
 	key: 'basket',
@@ -23,10 +20,6 @@ const persistedOrderReducer = persistReducer(persistConfigOrder, orderSlice.redu
 export const rootReducer = combineReducers({
   [basketSlice.name]: persistedBasketReducer,
 	[productsSlice.name]: productsSlice.reducer,
-<<<<<<< HEAD
-	[orderSlice.name]: persistedOrderReducer
-=======
 	[orderSlice.name]: persistedOrderReducer,
 	[userSlice.name]: userSlice.reducer
->>>>>>> admin
 });

@@ -4,15 +4,6 @@ import styles from './input.module.scss';
 
 
 interface InputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
-<<<<<<< HEAD
-	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void, 
-	onInput?: (evt: React.ChangeEvent<HTMLInputElement>) => void, 
-	onBlur?: (evt: React.FocusEvent<HTMLInputElement>) => void,
-	value: string,
-	label?: string,
-	extraClass?: string,
-	error? : string,
-=======
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void,
 	onInput?: (evt: React.ChangeEvent<HTMLInputElement>) => void,
 	onBlur?: (evt: React.FocusEvent<HTMLInputElement>) => void,
@@ -21,22 +12,10 @@ interface InputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElem
 	extraClass?: string,
 	extraClassLabel?: string,
 	error?: string,
->>>>>>> admin
 	component?: ElementType;
 	mask?: string | Array<(string | RegExp)>;
 }
 
-<<<<<<< HEAD
-export function Input({ onChange, onInput, onBlur, value, label, placeholder, type, extraClass, error, component: Component = 'input', ...props}: InputProps) {
-	
-	return (
-		<label className={styles.form__field}>
-			{label &&<span className={clsx(styles.form__label, styles.modal__title)}>{label}</span>}
-			<Component className={clsx(styles.form__input, extraClass)}  onInput={onInput} onBlur={onBlur} onChange={onChange} value={value} type={type} placeholder={placeholder}  {...props} />
-			{!!error && <div className={styles.form__error}>{error}</div>}
-		</label>
-	)
-=======
 export function Input({ onChange, onInput, onBlur, value, label, extraClassLabel, placeholder, type, extraClass, error, component: Component = 'input', ...props }: InputProps) {
 
 	return (
@@ -46,5 +25,4 @@ export function Input({ onChange, onInput, onBlur, value, label, extraClassLabel
 			{!!error && <div className={styles.form__error}>{error}</div>}
 		</label>
 	);
->>>>>>> admin
 }

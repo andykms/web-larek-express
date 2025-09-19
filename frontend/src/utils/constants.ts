@@ -4,8 +4,6 @@ import styles from '@components/card/card.module.scss';
 export const API_URL = `${import.meta.env.VITE_API_ORIGIN}`;
 export const CDN_URL = `${import.meta.env.VITE_API_ORIGIN}`;
 
-<<<<<<< HEAD
-=======
 export type OptionType = {
 	title: string;
 	value: string;
@@ -32,7 +30,6 @@ export const CATEGORY_TYPES:OptionType[] = [
 	},
 ]
 
->>>>>>> admin
 export const CATEGORY_CLASSES = {
 	'софт-скил': styles.card__category_soft,
   'хард-скил': styles.card__category_hard,
@@ -50,12 +47,9 @@ export enum AppRoute {
   OrderAddress = '/order/address',
   OrderContacts = '/order/contacts',
 	OrderSuccess = '/order/success',
-<<<<<<< HEAD
-=======
 	Login = '/login',
 	Register = '/register',
 	Admin = '/admin',
 	AddProduct = 'add',
 	EditProduct = 'edit/:editId',
->>>>>>> admin
 }

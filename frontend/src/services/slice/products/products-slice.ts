@@ -1,13 +1,8 @@
 import { RequestStatus } from '@api';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-<<<<<<< HEAD
-import { IProduct } from '../../../utils/types';
-import { getProducts } from './thunk';
-=======
 import { isActionPending, isActionRejected } from '../../../utils/redux';
 import { IProduct } from '../../../utils/types';
 import { createProduct, deleteProduct, getProducts, updateProduct } from './thunk';
->>>>>>> admin
 import { TProductState } from './type';
 
 const initialState: TProductState = {
@@ -22,21 +17,10 @@ export const productsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-<<<<<<< HEAD
-      .addCase(getProducts.pending, (state) => {
-        state.status = RequestStatus.Loading;
-      })
-=======
->>>>>>> admin
       .addCase(getProducts.fulfilled, (state, { payload }:PayloadAction<IProduct[]>) => {
         state.data = payload;
         state.status = RequestStatus.Success;
       })
-<<<<<<< HEAD
-      .addCase(getProducts.rejected, (state) => {
-        state.status = RequestStatus.Failed;
-      });
-=======
       .addCase(createProduct.fulfilled, (state, { payload }:PayloadAction<IProduct>) => {
         state.data.push(payload);
         state.status = RequestStatus.Success;
@@ -55,7 +39,6 @@ export const productsSlice = createSlice({
 			.addMatcher(isActionRejected(productsSlice.name), state => {
 				state.status = RequestStatus.Failed;
 			});
->>>>>>> admin
   },
   selectors: {
     selectProducts: (state:TProductState) => state.data,

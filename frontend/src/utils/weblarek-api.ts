@@ -1,16 +1,5 @@
 import { API_URL, CDN_URL } from '@constants';
 
-<<<<<<< HEAD
-import { IOrder, IOrderResult, IProduct } from '@types';
-
-export const enum RequestStatus {
-	Idle='idle',
-	Loading='loading',
-	Success='success',
-	Failed='failed',
-}
-
-=======
 import { IFile, IOrder, IOrderResult, IProduct, ServerResponse, UserLoginBodyDto, UserRegisterBodyDto, UserResponse, UserResponseToken } from '@types';
 import { getCookie, setCookie } from './cookie';
 
@@ -22,61 +11,26 @@ export const enum RequestStatus {
 }
 
 
->>>>>>> admin
 export type ApiListResponse<Type> = {
 	total: number;
 	items: Type[];
 };
 
-<<<<<<< HEAD
- type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
- class Api {
-	readonly baseUrl: string;
-=======
 class Api {
 	private readonly baseUrl: string;
->>>>>>> admin
 	protected options: RequestInit;
 
 	constructor(baseUrl: string, options: RequestInit = {}) {
 		this.baseUrl = baseUrl;
 		this.options = {
 			headers: {
-<<<<<<< HEAD
-				'Content-Type': 'application/json',
-				...((options.headers as object) ?? {}),
-=======
 				...((options.headers as object) ?? {}),
 
->>>>>>> admin
 			},
 		};
 	}
 
 	protected handleResponse<T>(response: Response): Promise<T> {
-<<<<<<< HEAD
-		if (response.ok) return response.json();
-		else
-			return response
-				.json()
-				.then(data => Promise.reject(data.error ?? response.statusText));
-	}
-
-	get<T>(uri: string) {
-		return fetch(this.baseUrl + uri, {
-			...this.options,
-			method: 'GET',
-		}).then(this.handleResponse<T>);
-	}
-
-	post<T>(uri: string, data: object, method: ApiPostMethods = 'POST') {
-		return fetch(this.baseUrl + uri, {
-			...this.options,
-			method,
-			body: JSON.stringify(data),
-		}).then(this.handleResponse<T>);
-	}
-=======
 		return response.ok
 			? response.json()
 			: response
@@ -125,7 +79,6 @@ class Api {
 				});
 			}
 		}
->>>>>>> admin
 }
 
 export interface IWebLarekAPI {
@@ -143,30 +96,17 @@ export class WebLarekAPI extends Api implements IWebLarekAPI {
 	}
 
 	getProductItem = (id: string): Promise<IProduct> => {
-<<<<<<< HEAD
-		return this.get<IProduct>(`/product/${id}`).then((data: IProduct) => ({
-=======
 		return this.request<IProduct>(`/product/${id}`, { method: 'GET' }).then((data: IProduct) => ({
->>>>>>> admin
 			...data,
 			image: {
 				...data.image,
 				fileName: this.cdn + data.image.fileName,
 			}
-<<<<<<< HEAD
-
-		}));
-	}
-
-	getProductList = (): Promise<IProduct[]> => {
-		return this.get<ApiListResponse<IProduct>>('/product').then((data: ApiListResponse<IProduct>) =>
-=======
 		}));
 	};
 
 	getProductList = (): Promise<IProduct[]> => {
 		return this.request<ApiListResponse<IProduct>>('/product', { method: 'GET' }).then((data: ApiListResponse<IProduct>) =>
->>>>>>> admin
 			data.items.map(item => ({
 				...item,
 				image: {
@@ -175,17 +115,6 @@ export class WebLarekAPI extends Api implements IWebLarekAPI {
 				}
 			}))
 		);
-<<<<<<< HEAD
-	}
-
-	orderProducts = (order: IOrder): Promise<IOrderResult> =>{
-		return this.post<IOrderResult>('/order', order).then((data: IOrderResult) => data);
-	}
-}
-
-
-export default new WebLarekAPI(CDN_URL, API_URL)
-=======
 	};
 
 	orderProducts = (order: IOrder): Promise<IOrderResult> => {
@@ -291,4 +220,3 @@ export default new WebLarekAPI(CDN_URL, API_URL)
 
 
 export default new WebLarekAPI(CDN_URL, API_URL);
->>>>>>> admin

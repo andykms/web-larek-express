@@ -1,10 +1,6 @@
 .modal {
   @include mixins.sublayer;
   height: max-content;
-<<<<<<< HEAD
-  position: fixed;
-=======
->>>>>>> admin
   display: none;
   justify-content: center;
   z-index: 100;

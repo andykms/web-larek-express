@@ -4,7 +4,6 @@
   border-radius: $defaultBorderRadius;
   background-color: $primary;
   color: white;
-  padding: $defaultPadding;
   align-items: flex-start;
   text-decoration: none;
 
@@ -79,13 +78,10 @@
       background-color: $category4;
     }
   }
-<<<<<<< HEAD
-=======
   &__action {
 
   }
   &__price {
 
   }
->>>>>>> admin
 }

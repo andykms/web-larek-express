@@ -11,11 +11,7 @@ export interface IProduct {
 }
 
 export interface IFile {
-<<<<<<< HEAD
-    fileName: string;
-=======
     fileName: string
->>>>>>> admin
     originalName: string;
 }
 
@@ -33,8 +29,6 @@ export interface IOrder {
     items: string[];
 }
 
-<<<<<<< HEAD
-=======
 
 export interface IUser {
 	email: string;
@@ -69,7 +63,6 @@ export type UserRegisterBodyDto = {
 	password: string;
 } & IUser;
 
->>>>>>> admin
 export type OrderForm = Omit<IOrder, 'total'|'items'>;
 
 export interface IOrderResult {

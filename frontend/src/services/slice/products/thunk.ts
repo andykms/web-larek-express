@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import { IProduct } from '../../../utils/types';
-import { createAsyncThunk } from '../../hooks';
-
-export const getProducts = createAsyncThunk<IProduct[], void>(
-  'products/getProductList', (_, {extra: {getProductList}}) => {
-    return getProductList()
-=======
 import { IFile, IProduct } from '../../../utils/types';
 import { createAsyncThunk } from '../../hooks';
 
@@ -43,6 +35,5 @@ export const updateProduct = createAsyncThunk<IProduct, {data: Partial<Omit<IPro
 export const deleteProduct = createAsyncThunk<IProduct, string>(
   'products/deleteProduct', (id, { extra: { deleteProduct } }) => {
     return deleteProduct(id);
->>>>>>> admin
   }
 );

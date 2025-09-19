@@ -5,7 +5,7 @@
   width: 100%;
   box-sizing: border-box;
   max-width: $maxPageWidth;
-  padding: $top $defaultPadding $bottom;
+  padding: $top 0 $bottom;
 }
 
 @mixin sublayer {
