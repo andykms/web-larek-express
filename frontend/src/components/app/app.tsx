@@ -4,26 +4,54 @@ import {
 	Routes,
 	To,
 	useLocation,
+<<<<<<< HEAD
 	useNavigate
+=======
+	useNavigate,
+>>>>>>> admin
 } from 'react-router-dom';
 import '../../index.scss';
 import styles from './app.module.scss';
 
+<<<<<<< HEAD
+=======
+import AdminEditProduct from '@components/admin/admin-edit-product';
+import AdminNewProduct from '@components/admin/admin-new-product';
+import AdminProducts from '@components/admin/admin-products';
+>>>>>>> admin
 import Basket from '@components/basket';
 import CardDetails from '@components/card-details';
 import Header from '@components/header';
 import Modal from '@components/modal';
+<<<<<<< HEAD
 import { AppRoute } from '@constants';
 import {
 	productsActions
 } from '@slices/products';
+=======
+import Order, { OrderAddress, OrderContacts, OrderSuccess } from '@components/order';
+import ProtectedRoute from '@components/protected-route/protected-route';
+import { AppRoute } from '@constants';
+import AdminPage from '@pages/admin/admin-page';
+import LoginPage from '@pages/login/login-page';
+import MainPage from '@pages/main/main-page';
+import RegisterPage from '@pages/register/register-page';
+import { productsActions } from '@slices/products';
+import { userActions } from '@slices/user';
+>>>>>>> admin
 import { useActionCreators } from '@store/hooks';
 import store, { persistor } from '@store/store';
 import { PropsWithChildren, useEffect } from 'react';
 import { Provider } from 'react-redux';
+<<<<<<< HEAD
 import { PersistGate } from 'redux-persist/integration/react';
 import MainPage from '../../pages/main/main-page';
 import Order, { OrderAddress, OrderContacts, OrderSuccess } from '../order';
+=======
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PersistGate } from 'redux-persist/integration/react';
+>>>>>>> admin
 
 const App = () => (
 	<BrowserRouter>
@@ -41,6 +69,7 @@ const RouteComponent = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { getProducts } = useActionCreators(productsActions);
+<<<<<<< HEAD
 	const handleModalClose = (path: To | number)  => () => navigate(path as To);
 
 	useEffect(() => {
@@ -48,16 +77,39 @@ const RouteComponent = () => {
 	}, [getProducts]);
 
 	const locationState = location.state as { background?: Location };
+=======
+	const { authCheck, checkUserAuth } = useActionCreators(userActions);
+	const handleModalClose = (path: To | number) => () => navigate(path as To);
+
+	useEffect(() => {
+		getProducts();
+		checkUserAuth().unwrap().finally(() => authCheck());
+	}, [getProducts, checkUserAuth, authCheck]);
+
+	const locationState = location.state as { background?: Location; };
+>>>>>>> admin
 	const background = locationState && locationState.background;
 
 	return (
 		<>
 			<Header />
 			<Routes location={background || location}>
+<<<<<<< HEAD
 				<Route
 					path={AppRoute.Main}
 					element={<MainPage />}
 				/>
+=======
+				<Route path={AppRoute.Main} element={<MainPage />} />
+				<Route path={AppRoute.Login} element={<ProtectedRoute onlyUnAuth><LoginPage /></ProtectedRoute>} />
+				<Route path={AppRoute.Register} element={<ProtectedRoute onlyUnAuth><RegisterPage /></ProtectedRoute>} />
+				<Route path={AppRoute.Admin} element={<ProtectedRoute><AdminPage /></ProtectedRoute>}>
+					<Route path={AppRoute.Admin} element={<AdminProducts />} />
+					<Route path={AppRoute.AddProduct} element={<AdminNewProduct />} />
+					<Route path={AppRoute.EditProduct} element={<AdminEditProduct />} />
+				</Route>
+
+>>>>>>> admin
 				<Route path={AppRoute.Basket} element={<Basket />} />
 				<Route path={AppRoute.Order} element={<Order />}>
 					<Route path={AppRoute.OrderAddress} element={<OrderAddress />} />
@@ -76,11 +128,68 @@ const RouteComponent = () => {
 							</Modal>
 						}
 					/>
+<<<<<<< HEAD
 					<Route path={AppRoute.Basket} element={<Modal onClose={handleModalClose(-1)}><Basket /></Modal>} />
 					<Route path={AppRoute.Order} element={<Order />}>
 						<Route path={AppRoute.OrderAddress} element={<Modal title='Способ оплаты' onClose={handleModalClose({pathname: AppRoute.Main})}><OrderAddress /></Modal>} />
 						<Route path={AppRoute.OrderContacts} element={<Modal onClose={handleModalClose({pathname: AppRoute.Main})}><OrderContacts /></Modal>} />
 						<Route path={AppRoute.OrderSuccess} element={<Modal onClose={handleModalClose({pathname: AppRoute.Main})}><OrderSuccess /></Modal>} />
+=======
+					<Route
+						path={AppRoute.Basket}
+						element={
+							<Modal onClose={handleModalClose(-1)}>
+								<Basket />
+							</Modal>
+						}
+					/>
+					<Route path={AppRoute.Order} element={<Order />}>
+						<Route
+							path={AppRoute.OrderAddress}
+							element={
+								<Modal
+									title='Способ оплаты'
+									onClose={handleModalClose({ pathname: AppRoute.Main })}
+								>
+									<OrderAddress />
+								</Modal>
+							}
+						/>
+						<Route
+							path={AppRoute.OrderContacts}
+							element={
+								<Modal onClose={handleModalClose({ pathname: AppRoute.Main })}>
+									<OrderContacts />
+								</Modal>
+							}
+						/>
+						<Route
+							path={AppRoute.OrderSuccess}
+							element={
+								<Modal onClose={handleModalClose({ pathname: AppRoute.Main })}>
+									<OrderSuccess />
+								</Modal>
+							}
+						/>
+					</Route>
+					<Route path={AppRoute.Admin} element={<AdminPage />}>
+						<Route
+							path={AppRoute.AddProduct}
+							element={
+								<Modal onClose={handleModalClose({ pathname: AppRoute.Admin })}>
+									<AdminNewProduct />
+								</Modal>
+							}
+						/>
+						<Route
+							path={AppRoute.EditProduct}
+							element={
+								<Modal onClose={handleModalClose({ pathname: AppRoute.Admin })}>
+									<AdminEditProduct />
+								</Modal>
+							}
+						/>
+>>>>>>> admin
 					</Route>
 				</Routes>
 			)}
@@ -90,7 +199,20 @@ const RouteComponent = () => {
 
 const ProviderComponent = ({ children }: PropsWithChildren) => (
 	<Provider store={store}>
+<<<<<<< HEAD
 		{' '}
 		<PersistGate persistor={persistor}>{children}</PersistGate>
+=======
+		<PersistGate persistor={persistor}>{children}</PersistGate>
+		<ToastContainer
+			position='top-right'
+			autoClose={5e3}
+			newestOnTop={false}
+			closeOnClick
+			pauseOnFocusLoss
+			pauseOnHover
+			theme='colored'
+		/>
+>>>>>>> admin
 	</Provider>
 );

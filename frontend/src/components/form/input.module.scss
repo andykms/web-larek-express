@@ -29,6 +29,22 @@
     &::placeholder {
       color: $hover;
     }
+<<<<<<< HEAD
   }
 }
 
+=======
+
+    &[type=number]::-webkit-inner-spin-button {
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    
+  }
+}
+textarea.form__input {
+  resize: none;
+  min-height: 225px;
+}
+>>>>>>> admin

@@ -23,7 +23,10 @@
   &__basket {
     //@include mixins.icon($headerElementsSize, 'basket-2');
     @include mixins.link($primary, $hover);
+<<<<<<< HEAD
     background-image: url(../images/shopping_cart.svg);
+=======
+>>>>>>> admin
     height: 58px;
     width: 58px;
     border: none;

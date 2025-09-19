@@ -11,7 +11,11 @@ export interface IProduct {
 }
 
 export interface IFile {
+<<<<<<< HEAD
     fileName: string;
+=======
+    fileName: string
+>>>>>>> admin
     originalName: string;
 }
 
@@ -29,6 +33,43 @@ export interface IOrder {
     items: string[];
 }
 
+<<<<<<< HEAD
+=======
+
+export interface IUser {
+	email: string;
+	name: string;
+}
+
+export type ServerResponse<T> = {
+	success: boolean;
+} & T;
+
+export type UserResponseToken = ServerResponse<{
+	user: IUser;
+	accessToken: string;
+	refreshToken: string;
+}>;
+
+export type UserResponse = ServerResponse<{
+	user: IUser;
+}>;
+
+export type RefreshResponse = ServerResponse<{
+	accessToken: string;
+	refreshToken: string;
+}>;
+
+export type UserLoginBodyDto = {
+	email: string;
+	password: string;
+};
+
+export type UserRegisterBodyDto = {
+	password: string;
+} & IUser;
+
+>>>>>>> admin
 export type OrderForm = Omit<IOrder, 'total'|'items'>;
 
 export interface IOrderResult {

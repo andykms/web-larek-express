@@ -12,7 +12,10 @@ import { useIsBasket } from './hooks/useIsBasket';
 type CardProps = {
 	dataCard: IProduct;
 	full?: boolean;
+<<<<<<< HEAD
 	extraClass?: string;
+=======
+>>>>>>> admin
 	compact?: boolean;
 	component: ElementType;
 };
@@ -21,7 +24,10 @@ export default function Card({
 	dataCard,
 	full,
 	compact,
+<<<<<<< HEAD
 	extraClass,
+=======
+>>>>>>> admin
 	component: Component = 'div',
 }: CardProps) {
 	const location = useLocation();
@@ -37,8 +43,12 @@ export default function Card({
 			className={clsx(
 				styles.card,
 				full && styles.card_full,
+<<<<<<< HEAD
 				compact && styles.card_compact,
 				extraClass && extraClass
+=======
+				compact && styles.card_compact
+>>>>>>> admin
 			)}
 		>
 			{!full && (

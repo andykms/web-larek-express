@@ -17,4 +17,9 @@ node_modules
 # Typescript build
 dist
 temp
+<<<<<<< HEAD
 .env
+=======
+.env
+logs/.*
+>>>>>>> admin

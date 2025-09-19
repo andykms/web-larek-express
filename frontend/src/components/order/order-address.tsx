@@ -18,11 +18,16 @@ export function OrderAddress() {
 	const orderPersistData = useSelector(selectOrderInfo);
 	const { setInfo } = useActionCreators(orderActions);
 	const formRef = useRef<HTMLFormElement | null>(null);
+<<<<<<< HEAD
 	const { values, handleChange, errors, isValid, setValuesForm  } =
+=======
+	const { values, handleChange, errors, isValid, setValuesForm } =
+>>>>>>> admin
 		useFormWithValidation<PaymentFormValues>({
 			address: "",
 			payment: PaymentType.Online,
 		}, formRef.current);
+<<<<<<< HEAD
 
 	useEffect(() => {
 			setValuesForm({
@@ -31,6 +36,15 @@ export function OrderAddress() {
 			});
 		}, [orderPersistData]);
 	
+=======
+		
+	useEffect(() => {
+		setValuesForm({
+			address: orderPersistData.address,
+			payment: PaymentType.Online
+		});
+	}, [orderPersistData]);
+>>>>>>> admin
 
 	const nextStep = () => {
 		setInfo(values);
